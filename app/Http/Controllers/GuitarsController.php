@@ -4,18 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Guitar;
+use App\Http\Requests\GuitarFormRequest;
+
 
 class GuitarsController extends Controller
 {
 
-    // Sample Data in Array or showing a number of data in a data set.
+    // Sample Static Data 
     private static function getData() {
-
-        // Display the list if there is a list
-
-        // return [
-
-        // ];
 
         // Display the static data.
         return [
@@ -23,11 +19,8 @@ class GuitarsController extends Controller
             ['id' => 2, 'name' => 'Starla S2', 'brand' => 'PRS' ],
             ['id' => 3, 'name' => 'Explorer', 'brand' => 'Gibson' ],
             ['id' => 4, 'name' => 'Talman', 'brand' => 'Ibanez' ],
-        ];
+        ]; 
     }
-
-
-
 
 
     /**
@@ -65,25 +58,16 @@ class GuitarsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(GuitarFormRequest $request)
     {
 
         // Validating Data
-        $request->validate([
-            'guitar-name' => 'required',
-            'brand' => 'required',
-            'year' => ['required', 'integer'],
-        ]);
+        $data = $request->validated();
 
-        // POST
-        $guitar = new Guitar();
 
-        $guitar->name = strip_tags($request->input('guitar-name'));
-        $guitar->brand = strip_tags($request->input('brand'));
-        $guitar->year_made = strip_tags($request->input('year'));
+        Guitar::create($data);
 
-        $guitar->save();
-
+        
         return redirect()->route('guitars.index');
     }
 
@@ -93,19 +77,14 @@ class GuitarsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($guitar)
+    public function show(Guitar $guitar)
     {
-        // GET 
-        $guitars = self::getData();
-
-        $index = array_search($guitar, array_column($guitars, 'id'));
-
-        if($index === false) {
-            abort(404);
-        }
+        // GET
+        // Using Model Guitar as Type Hint 
         return view('guitars.show', [
-            'guitar' => $guitars[$index]
+            'guitar' => $guitar 
         ]);
+
     }
 
     /**
@@ -114,9 +93,13 @@ class GuitarsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Guitar $guitar)
     {
         // GET 
+        return view('guitars.edit', [
+            'guitar' => $guitar 
+        ]);
+
     }
 
     /**
@@ -126,9 +109,17 @@ class GuitarsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(GuitarFormRequest $request, Guitar $guitar)
     {
-        // POST 
+        
+        // Validating Data
+        $data = $request->validated();
+
+
+        $guitar->update($data);
+
+
+        return redirect()->route('guitars.show', $guitar);
     }
 
     /**
